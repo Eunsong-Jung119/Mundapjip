@@ -1,0 +1,776 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		255B30F62E7CF9D300D75660 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 255B30F52E7CF9D300D75660 /* GoogleSignIn */; };
+		255B30F82E7CF9D300D75660 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 255B30F72E7CF9D300D75660 /* GoogleSignInSwift */; };
+		258C86962EBF110A0035A1D4 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 258C86952EBF110A0035A1D4 /* Auth */; };
+		258C86982EBF110A0035A1D4 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = 258C86972EBF110A0035A1D4 /* Functions */; };
+		258C869A2EBF110A0035A1D4 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 258C86992EBF110A0035A1D4 /* PostgREST */; };
+		258C869C2EBF110A0035A1D4 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 258C869B2EBF110A0035A1D4 /* Realtime */; };
+		258C869E2EBF110A0035A1D4 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 258C869D2EBF110A0035A1D4 /* Storage */; };
+		258C86A12EBF2CA20035A1D4 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 258C86A02EBF2CA20035A1D4 /* Auth */; };
+		258C86A32EBF2CA20035A1D4 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = 258C86A22EBF2CA20035A1D4 /* Functions */; };
+		258C86A52EBF2CA20035A1D4 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 258C86A42EBF2CA20035A1D4 /* PostgREST */; };
+		258C86A72EBF2CA20035A1D4 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 258C86A62EBF2CA20035A1D4 /* Realtime */; };
+		258C86A92EBF2CA20035A1D4 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 258C86A82EBF2CA20035A1D4 /* Storage */; };
+		258C86AB2EBF2E090035A1D4 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 258C86AA2EBF2E090035A1D4 /* Supabase */; };
+		259D53BE2EBA4F2E007BF8C6 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 259D53BD2EBA4F2E007BF8C6 /* Auth */; };
+		259D53C02EBA4F2E007BF8C6 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = 259D53BF2EBA4F2E007BF8C6 /* Functions */; };
+		259D53C22EBA4F2E007BF8C6 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 259D53C12EBA4F2E007BF8C6 /* PostgREST */; };
+		259D53C42EBA4F2E007BF8C6 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 259D53C32EBA4F2E007BF8C6 /* Realtime */; };
+		259D53C62EBA4F2E007BF8C6 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 259D53C52EBA4F2E007BF8C6 /* Storage */; };
+		25B230F12F2DDD1E00E4DCAC /* NanumPen.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 25B230F02F2DDD1E00E4DCAC /* NanumPen.ttf */; };
+		25B230F52F2DEA0F00E4DCAC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 25B230F42F2DEA0F00E4DCAC /* LaunchScreen.storyboard */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		254039E42E22286A009CA861 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 254039CE2E222866009CA861 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 254039D52E222866009CA861;
+			remoteInfo = Mundapjip;
+		};
+		254039EE2E22286A009CA861 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 254039CE2E222866009CA861 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 254039D52E222866009CA861;
+			remoteInfo = Mundapjip;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		254039D62E222866009CA861 /* Mundapjip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mundapjip.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		254039E32E22286A009CA861 /* MundapjipTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MundapjipTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		254039ED2E22286A009CA861 /* MundapjipUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MundapjipUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		255B31092E7D65F500D75660 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		255B310B2E7D668A00D75660 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		25B230F02F2DDD1E00E4DCAC /* NanumPen.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = NanumPen.ttf; sourceTree = "<group>"; };
+		25B230F42F2DEA0F00E4DCAC /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		25017C4F2E7E584E00D206FE /* Exceptions for "Mundapjip" folder in "Mundapjip" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/Info.plist,
+			);
+			target = 254039D52E222866009CA861 /* Mundapjip */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		254039D82E222866009CA861 /* Mundapjip */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				25017C4F2E7E584E00D206FE /* Exceptions for "Mundapjip" folder in "Mundapjip" target */,
+			);
+			path = Mundapjip;
+			sourceTree = "<group>";
+		};
+		254039E62E22286A009CA861 /* MundapjipTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MundapjipTests;
+			sourceTree = "<group>";
+		};
+		254039F02E22286A009CA861 /* MundapjipUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MundapjipUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		254039D32E222866009CA861 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				258C869E2EBF110A0035A1D4 /* Storage in Frameworks */,
+				255B30F62E7CF9D300D75660 /* GoogleSignIn in Frameworks */,
+				255B30F82E7CF9D300D75660 /* GoogleSignInSwift in Frameworks */,
+				259D53C62EBA4F2E007BF8C6 /* Storage in Frameworks */,
+				258C86A32EBF2CA20035A1D4 /* Functions in Frameworks */,
+				258C86982EBF110A0035A1D4 /* Functions in Frameworks */,
+				258C86A92EBF2CA20035A1D4 /* Storage in Frameworks */,
+				258C869A2EBF110A0035A1D4 /* PostgREST in Frameworks */,
+				259D53C02EBA4F2E007BF8C6 /* Functions in Frameworks */,
+				258C86A12EBF2CA20035A1D4 /* Auth in Frameworks */,
+				258C86A52EBF2CA20035A1D4 /* PostgREST in Frameworks */,
+				259D53C42EBA4F2E007BF8C6 /* Realtime in Frameworks */,
+				258C86A72EBF2CA20035A1D4 /* Realtime in Frameworks */,
+				259D53BE2EBA4F2E007BF8C6 /* Auth in Frameworks */,
+				258C86AB2EBF2E090035A1D4 /* Supabase in Frameworks */,
+				258C86962EBF110A0035A1D4 /* Auth in Frameworks */,
+				259D53C22EBA4F2E007BF8C6 /* PostgREST in Frameworks */,
+				258C869C2EBF110A0035A1D4 /* Realtime in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		254039E02E22286A009CA861 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		254039EA2E22286A009CA861 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		254039CD2E222866009CA861 = {
+			isa = PBXGroup;
+			children = (
+				255B310B2E7D668A00D75660 /* Release.xcconfig */,
+				255B31092E7D65F500D75660 /* Debug.xcconfig */,
+				254039D82E222866009CA861 /* Mundapjip */,
+				254039E62E22286A009CA861 /* MundapjipTests */,
+				254039F02E22286A009CA861 /* MundapjipUITests */,
+				2548898C2E7D96990006DCD2 /* Frameworks */,
+				254039D72E222866009CA861 /* Products */,
+				25B230F02F2DDD1E00E4DCAC /* NanumPen.ttf */,
+				25B230F42F2DEA0F00E4DCAC /* LaunchScreen.storyboard */,
+			);
+			sourceTree = "<group>";
+		};
+		254039D72E222866009CA861 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				254039D62E222866009CA861 /* Mundapjip.app */,
+				254039E32E22286A009CA861 /* MundapjipTests.xctest */,
+				254039ED2E22286A009CA861 /* MundapjipUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2548898C2E7D96990006DCD2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		254039D52E222866009CA861 /* Mundapjip */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 254039F72E22286A009CA861 /* Build configuration list for PBXNativeTarget "Mundapjip" */;
+			buildPhases = (
+				254039D22E222866009CA861 /* Sources */,
+				254039D32E222866009CA861 /* Frameworks */,
+				254039D42E222866009CA861 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				254039D82E222866009CA861 /* Mundapjip */,
+			);
+			name = Mundapjip;
+			packageProductDependencies = (
+				255B30F52E7CF9D300D75660 /* GoogleSignIn */,
+				255B30F72E7CF9D300D75660 /* GoogleSignInSwift */,
+				259D53BD2EBA4F2E007BF8C6 /* Auth */,
+				259D53BF2EBA4F2E007BF8C6 /* Functions */,
+				259D53C12EBA4F2E007BF8C6 /* PostgREST */,
+				259D53C32EBA4F2E007BF8C6 /* Realtime */,
+				259D53C52EBA4F2E007BF8C6 /* Storage */,
+				258C86952EBF110A0035A1D4 /* Auth */,
+				258C86972EBF110A0035A1D4 /* Functions */,
+				258C86992EBF110A0035A1D4 /* PostgREST */,
+				258C869B2EBF110A0035A1D4 /* Realtime */,
+				258C869D2EBF110A0035A1D4 /* Storage */,
+				258C86A02EBF2CA20035A1D4 /* Auth */,
+				258C86A22EBF2CA20035A1D4 /* Functions */,
+				258C86A42EBF2CA20035A1D4 /* PostgREST */,
+				258C86A62EBF2CA20035A1D4 /* Realtime */,
+				258C86A82EBF2CA20035A1D4 /* Storage */,
+				258C86AA2EBF2E090035A1D4 /* Supabase */,
+			);
+			productName = Mundapjip;
+			productReference = 254039D62E222866009CA861 /* Mundapjip.app */;
+			productType = "com.apple.product-type.application";
+		};
+		254039E22E22286A009CA861 /* MundapjipTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 254039FA2E22286A009CA861 /* Build configuration list for PBXNativeTarget "MundapjipTests" */;
+			buildPhases = (
+				254039DF2E22286A009CA861 /* Sources */,
+				254039E02E22286A009CA861 /* Frameworks */,
+				254039E12E22286A009CA861 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				254039E52E22286A009CA861 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				254039E62E22286A009CA861 /* MundapjipTests */,
+			);
+			name = MundapjipTests;
+			packageProductDependencies = (
+			);
+			productName = MundapjipTests;
+			productReference = 254039E32E22286A009CA861 /* MundapjipTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		254039EC2E22286A009CA861 /* MundapjipUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 254039FD2E22286A009CA861 /* Build configuration list for PBXNativeTarget "MundapjipUITests" */;
+			buildPhases = (
+				254039E92E22286A009CA861 /* Sources */,
+				254039EA2E22286A009CA861 /* Frameworks */,
+				254039EB2E22286A009CA861 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				254039EF2E22286A009CA861 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				254039F02E22286A009CA861 /* MundapjipUITests */,
+			);
+			name = MundapjipUITests;
+			packageProductDependencies = (
+			);
+			productName = MundapjipUITests;
+			productReference = 254039ED2E22286A009CA861 /* MundapjipUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		254039CE2E222866009CA861 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 2610;
+				TargetAttributes = {
+					254039D52E222866009CA861 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					254039E22E22286A009CA861 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 254039D52E222866009CA861;
+					};
+					254039EC2E22286A009CA861 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 254039D52E222866009CA861;
+					};
+				};
+			};
+			buildConfigurationList = 254039D12E222866009CA861 /* Build configuration list for PBXProject "Mundapjip" */;
+			developmentRegion = ko;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				ko,
+			);
+			mainGroup = 254039CD2E222866009CA861;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				255B30F42E7CF8D000D75660 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				258C869F2EBF2CA20035A1D4 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 254039D72E222866009CA861 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				254039D52E222866009CA861 /* Mundapjip */,
+				254039E22E22286A009CA861 /* MundapjipTests */,
+				254039EC2E22286A009CA861 /* MundapjipUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		254039D42E222866009CA861 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				25B230F52F2DEA0F00E4DCAC /* LaunchScreen.storyboard in Resources */,
+				25B230F12F2DDD1E00E4DCAC /* NanumPen.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		254039E12E22286A009CA861 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		254039EB2E22286A009CA861 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		254039D22E222866009CA861 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		254039DF2E22286A009CA861 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		254039E92E22286A009CA861 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		254039E52E22286A009CA861 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 254039D52E222866009CA861 /* Mundapjip */;
+			targetProxy = 254039E42E22286A009CA861 /* PBXContainerItemProxy */;
+		};
+		254039EF2E22286A009CA861 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 254039D52E222866009CA861 /* Mundapjip */;
+			targetProxy = 254039EE2E22286A009CA861 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		254039F52E22286A009CA861 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 255B31092E7D65F500D75660 /* Debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		254039F62E22286A009CA861 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 255B310B2E7D668A00D75660 /* Release.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		254039F82E22286A009CA861 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 255B31092E7D65F500D75660 /* Debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Mundapjip/Mundapjip.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QNU553B28Q;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(PROJECT_DIR)/Mundapjip/Resources/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "가족문답집";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eunsong.mundapjip;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		254039F92E22286A009CA861 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 255B310B2E7D668A00D75660 /* Release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Mundapjip/Mundapjip.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QNU553B28Q;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(PROJECT_DIR)/Mundapjip/Resources/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "가족문답집";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eunsong.mundapjip;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		254039FB2E22286A009CA861 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.codewithchris.MundapjipTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Mundapjip.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Mundapjip";
+			};
+			name = Debug;
+		};
+		254039FC2E22286A009CA861 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.codewithchris.MundapjipTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Mundapjip.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Mundapjip";
+			};
+			name = Release;
+		};
+		254039FE2E22286A009CA861 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.codewithchris.MundapjipUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Mundapjip;
+			};
+			name = Debug;
+		};
+		254039FF2E22286A009CA861 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.codewithchris.MundapjipUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Mundapjip;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		254039D12E222866009CA861 /* Build configuration list for PBXProject "Mundapjip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				254039F52E22286A009CA861 /* Debug */,
+				254039F62E22286A009CA861 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		254039F72E22286A009CA861 /* Build configuration list for PBXNativeTarget "Mundapjip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				254039F82E22286A009CA861 /* Debug */,
+				254039F92E22286A009CA861 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		254039FA2E22286A009CA861 /* Build configuration list for PBXNativeTarget "MundapjipTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				254039FB2E22286A009CA861 /* Debug */,
+				254039FC2E22286A009CA861 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		254039FD2E22286A009CA861 /* Build configuration list for PBXNativeTarget "MundapjipUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				254039FE2E22286A009CA861 /* Debug */,
+				254039FF2E22286A009CA861 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		255B30F42E7CF8D000D75660 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+		258C869F2EBF2CA20035A1D4 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		255B30F52E7CF9D300D75660 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 255B30F42E7CF8D000D75660 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		255B30F72E7CF9D300D75660 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 255B30F42E7CF8D000D75660 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		258C86952EBF110A0035A1D4 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Auth;
+		};
+		258C86972EBF110A0035A1D4 /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Functions;
+		};
+		258C86992EBF110A0035A1D4 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PostgREST;
+		};
+		258C869B2EBF110A0035A1D4 /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Realtime;
+		};
+		258C869D2EBF110A0035A1D4 /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Storage;
+		};
+		258C86A02EBF2CA20035A1D4 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 258C869F2EBF2CA20035A1D4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		258C86A22EBF2CA20035A1D4 /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 258C869F2EBF2CA20035A1D4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		258C86A42EBF2CA20035A1D4 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 258C869F2EBF2CA20035A1D4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		258C86A62EBF2CA20035A1D4 /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 258C869F2EBF2CA20035A1D4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		258C86A82EBF2CA20035A1D4 /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 258C869F2EBF2CA20035A1D4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		258C86AA2EBF2E090035A1D4 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 258C869F2EBF2CA20035A1D4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		259D53BD2EBA4F2E007BF8C6 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Auth;
+		};
+		259D53BF2EBA4F2E007BF8C6 /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Functions;
+		};
+		259D53C12EBA4F2E007BF8C6 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PostgREST;
+		};
+		259D53C32EBA4F2E007BF8C6 /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Realtime;
+		};
+		259D53C52EBA4F2E007BF8C6 /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Storage;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 254039CE2E222866009CA861 /* Project object */;
+}

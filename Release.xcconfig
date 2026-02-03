@@ -1,0 +1,13 @@
+//
+//  Release.xcconfig
+//  Mundapjip
+//
+//  Created by Eunsong Jung on 9/19/25.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+SUPABASE_HOST = zzcguyqxnkrhvpmjyhuf.supabase.co
+SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6Y2d1eXF4bmtyaHZwbWp5aHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyNjgxMDIsImV4cCI6MjA3Mzg0NDEwMn0.laVi1570vwCN6LaIPqRJjr2iukDjHzbL3q-r_27uvFA
+
