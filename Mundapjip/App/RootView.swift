@@ -18,7 +18,7 @@ struct RootView: View {
 
             switch session.route {
             case .splash:
-                SplashView()
+                BootLoadingView()
 
             case .onboarding:
                 OnboardingView {
@@ -42,11 +42,22 @@ struct RootView: View {
             }
         }
         .id(session.rootResetToken)
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active, session.route == .home {
-                Task { await session.refreshAnswerState() }
-            }
+        .onChange(of: session.route) { _, newValue in
+            print("[route] ->", String(describing: newValue))
         }
     }
 }
 
+private struct BootLoadingView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            ProgressView()
+                .controlSize(.large)
+
+            Text("불러오는 중…")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}

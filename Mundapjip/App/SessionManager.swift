@@ -18,22 +18,37 @@ final class SessionManager: ObservableObject {
     private var familyChannel: RealtimeChannel?
     private var authListener: Any?
     private var isLoggingOut = false
-    private var currentUserId: UUID?
     private var isWarmingUp = false
+    private var isCheckingAuth = false
+    
+
 
 
 
     // MARK: - Route / UI State
     enum Route { case splash, onboarding, login, selectRole, home }
     enum Tab { case home, quiz, profile }
+    enum TimeoutError: Error { case timedOut }
 
     enum FamilyError: Error {
         case unexpectedResponse
     }
+    
+    private enum AuthCache {
+        static let isLoggedIn = "auth.cache.isLoggedIn"
+        static let userId = "auth.cache.userId"
+        static let role = "auth.cache.role"
+        static let updatedAt = "auth.cache.updatedAt"
+    }
+
 
     @Published var route: Route = .splash
     @Published var currentTab: Tab = .home
     @Published var rootResetToken = UUID()
+    @Published var currentUserId: UUID?
+    @Published var hasResolvedRole = false
+
+
 
     // MARK: - User State
     @Published var isLoggedIn: Bool = false
@@ -58,58 +73,114 @@ final class SessionManager: ObservableObject {
     }
 
     // MARK: - Check Auth State
+
     @MainActor
     func checkAuthState() async {
+        // ✅ 동시 실행만 막기
+        if isCheckingAuth {
+            print("[auth] checkAuthState blocked (in-flight)")
+            return
+        }
+        isCheckingAuth = true
+        defer { isCheckingAuth = false }
+        
+        // ✅ 이미 홈 화면이면 재계산 스킵
+        if route == .home {
+            print("[auth] already home — skip checkAuthState")
+            return
+        }
+
         if hasRunAuthCheck {
             print("[auth] checkAuthState blocked")
             return
         }
         hasRunAuthCheck = true
 
-        do {
-            // 1) 세션 1회만
-            let session = try await client.auth.session
-            isLoggedIn = true
+        // ✅ 0) 캐시 기반 즉시 라우팅 (stale cache 방지)
+        let cache = loadAuthCache()
+        let cacheTTL: TimeInterval = 60 * 60 * 24 // 24시간
 
+        if cache.isLoggedIn,
+           let cachedUid = cache.userId,
+           let updatedAt = cache.updatedAt,
+           Date().timeIntervalSince(updatedAt) < cacheTTL {
+
+            isLoggedIn = true
+            currentUserId = cachedUid
+            currentUserRole = cache.role
+            decideRouteAfterLogin()
+        }
+
+        do {
+            // ✅ 1) 세션 조회 (타임아웃)
+            let session = try await withTimeout(seconds: 2.0) {
+                try await self.client.auth.session
+            }
+
+            isLoggedIn = true
             let uid = session.user.id
             currentUserId = uid
 
-            // (선택) 권한 요청은 warmup으로 옮겨도 됨
             requestPushPermissionIfNeeded()
 
-            // 3) role (FAST)
+            // ✅ 2) role 조회 (타임아웃)
             let userIdLower = uid.uuidString.lowercased()
+            let role: UserRole? = try await withTimeout(seconds: 2.0) {
+                struct RoleRow: Decodable { let role: String? }
+                let rows: [RoleRow] = try await self.client
+                    .from("user_roles")
+                    .select("role")
+                    .eq("user_id", value: userIdLower)
+                    .limit(1)
+                    .execute()
+                    .value
 
-            struct RoleRow: Decodable { let role: String? }
-            let roleRows: [RoleRow] = try await client
-                .from("user_roles")
-                .select("role")
-                .eq("user_id", value: userIdLower)
-                .limit(1)
-                .execute()
-                .value
-
-            if let role = roleRows.first?.role {
-                currentUserRole = UserRole(rawValue: role)
-            } else {
-                currentUserRole = nil
+                if let r = rows.first?.role {
+                    return UserRole(rawValue: r)
+                }
+                return nil
             }
 
-            // 4) 라우팅 먼저 (FAST)
+            currentUserRole = role
+            hasResolvedRole = true
+
+            // ✅ 3) 성공 캐시 저장
+            saveAuthCache(isLoggedIn: true, userId: uid, role: role)
+
+            // ✅ 4) 라우팅
             decideRouteAfterLogin()
 
-            // 5) 느린 작업은 uid 재사용해서 실행 (SLOW)
+            // ✅ 5) 느린 작업 분리
             Task { [weak self] in
                 guard let self else { return }
                 await self.postLoginWarmUp(userId: uid)
             }
 
+        } catch is TimeoutError {
+            print("[auth][timeout] checkAuthState timed out")
+            return
+
         } catch {
+            let msg = String(describing: error)
+
+            if msg.contains("sessionMissing") {
+                // ✅ 로그인 안 된 상태: 정상 플로우
+                print("[auth][no-session] session missing -> go to login/onboarding")
+            } else {
+                // ✅ 진짜 에러
+                print("[auth][error] checkAuthState failed:", msg)
+            }
+
+            // 세션이 없거나 깨졌으니 캐시는 제거하는 게 안전
+            clearAuthCache()
             currentUserId = nil
             isLoggedIn = false
+            currentUserRole = nil
             route = hasSeenOnboarding ? .login : .onboarding
         }
+
     }
+
 
 
     @MainActor
@@ -127,6 +198,33 @@ final class SessionManager: ObservableObject {
             PushTokenStore.shared.pendingToken = nil
         }
     }
+    
+    
+    @MainActor
+    private func refreshRoleAndCache(userId: UUID) async {
+        do {
+            let userIdLower = userId.uuidString.lowercased()
+
+            struct RoleRow: Decodable { let role: String? }
+            let roleRows: [RoleRow] = try await client
+                .from("user_roles")
+                .select("role")
+                .eq("user_id", value: userIdLower)
+                .limit(1)
+                .execute()
+                .value
+
+            let role = roleRows.first?.role.flatMap(UserRole.init(rawValue:))
+
+            currentUserRole = role
+            saveAuthCache(isLoggedIn: true, userId: userId, role: role)
+            decideRouteAfterLogin()
+        } catch {
+            // role 조회 실패해도 로그인 자체는 유지 (다음에 checkAuthState에서 재시도)
+            print("⚠️ refreshRoleAndCache error: \(error)")
+        }
+    }
+
 
 
 
@@ -156,15 +254,9 @@ final class SessionManager: ObservableObject {
 
     
     func handleOpenURL(_ url: URL) {
-        // Supabase가 OAuth redirect URL을 받아 세션을 완성
         print("[openURL] \(url.absoluteString)")
         client.auth.handle(url)
-
-        // 세션 확정 뒤 상태 재계산
-        Task { @MainActor in
-            self.hasRunAuthCheck = false
-            await self.checkAuthState()
-        }
+        // 이후는 startAuthListener가 처리
     }
 
 
@@ -178,7 +270,9 @@ final class SessionManager: ObservableObject {
         await checkAuthState()
     }
     
+    @MainActor
     func signInWithApple(idToken: String, nonce: String) async throws {
+        // 1) Supabase 로그인
         _ = try await client.auth.signInWithIdToken(
             credentials: .init(
                 provider: .apple,
@@ -187,11 +281,32 @@ final class SessionManager: ObservableObject {
             )
         )
 
-        // 새 세션 기준으로 다시 상태 계산 (email 로그인과 동일 패턴)
+        // 2) 세션을 즉시 읽어서 캐시 반영 (FAST)
+        //    실패해도 checkAuthState가 다시 잡아줌
+        if let session = try? await client.auth.session {
+            let uid = session.user.id
+            isLoggedIn = true
+            currentUserId = uid
+
+            // role은 아직 모를 수 있으니 nil로 캐시/상태 세팅
+            currentUserRole = nil
+            saveAuthCache(isLoggedIn: true, userId: uid, role: nil)
+
+            // ✅ 즉시 라우팅 (role 없으면 selectRole로 가게 될 것)
+            decideRouteAfterLogin()
+
+            // 3) role은 뒤에서 빠르게 조회해서 업데이트 (SLOW-ish)
+            Task { [weak self] in
+                guard let self else { return }
+                await self.refreshRoleAndCache(userId: uid)
+            }
+        }
+
+        // 4) 최종 검증/정합성은 checkAuthState가 담당
         hasRunAuthCheck = false
         await checkAuthState()
     }
-    
+
     
     func signInWithKakao() async throws {
         guard let redirectURL = URL(string: "mundapjip://login-callback") else {
@@ -210,14 +325,20 @@ final class SessionManager: ObservableObject {
     
 
     // MARK: - Sign Out
+    @MainActor
     func logout() async {
+        guard !isLoggingOut else { return } // ✅ 중복 실행 방지
         isLoggingOut = true
         defer { isLoggingOut = false }
+
+        // ✅ 0) 로컬 캐시 먼저 제거 (UI 즉시 로그인 상태로)
+        clearAuthCache()
+
         // 1) 실시간 구독 종료 (중요)
         do {
             try await familyChannel?.unsubscribe()
         } catch {
-            print("⚠️ unsubscribe error")
+            print("⚠️ unsubscribe error: \(error)")
         }
         familyChannel = nil
 
@@ -225,13 +346,16 @@ final class SessionManager: ObservableObject {
         do {
             try await client.auth.signOut()
         } catch {
-            print("❌ signOut error")
+            print("❌ signOut error: \(error)")
+            // signOut 실패해도 로컬은 로그아웃 상태로 만드는 게 UX상 낫고,
+            // 다음 앱 시작 때 checkAuthState()가 다시 검증해줌
         }
 
         // 3) 세션/상태 완전 초기화
         hasRunAuthCheck = false
 
         isLoggedIn = false
+        currentUserId = nil
         currentUserRole = nil
 
         currentFamilyId = nil
@@ -245,8 +369,9 @@ final class SessionManager: ObservableObject {
 
         // 4) 라우트 전환 + 루트 뷰 강제 재생성
         route = .login
-        rootResetToken = UUID() // 🔥 이게 “터치 먹는 레이어” 해결에 매우 효과적
+        rootResetToken = UUID()
     }
+
     // MARK: - Public API (View에서 호출)
 
     func selectRole(_ role: UserRole) async throws {
@@ -280,6 +405,8 @@ final class SessionManager: ObservableObject {
             .execute()
 
         currentUserRole = role
+        saveAuthCache(isLoggedIn: true, userId: session.user.id, role: role)
+
     }
 
 
@@ -290,6 +417,11 @@ final class SessionManager: ObservableObject {
             return
         }
 
+        // ✅ role 확정 전에는 절대 selectRole로 안 감
+        if !hasResolvedRole {
+            return
+        }
+
         if currentUserRole == nil {
             route = .selectRole
             return
@@ -297,6 +429,7 @@ final class SessionManager: ObservableObject {
 
         route = .home
     }
+
     
     // MARK: - Ensure Family if Needed
     private func ensureFamilyForUserIfNeeded() async {
@@ -586,6 +719,51 @@ final class SessionManager: ObservableObject {
                 }
             }
     }
+    
+    func withTimeout<T>(
+        seconds: Double,
+        operation: @escaping () async throws -> T
+    ) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask {
+                try await operation()
+            }
+            group.addTask {
+                try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                throw TimeoutError.timedOut
+            }
+
+            let result = try await group.next()!
+            group.cancelAll()
+            return result
+        }
+    }
+    
+    private func loadAuthCache() -> (isLoggedIn: Bool, userId: UUID?, role: UserRole?, updatedAt: Date?) {
+        let d = UserDefaults.standard
+        let isLoggedIn = d.bool(forKey: AuthCache.isLoggedIn)
+        let userId = d.string(forKey: AuthCache.userId).flatMap(UUID.init(uuidString:))
+        let role = d.string(forKey: AuthCache.role).flatMap(UserRole.init(rawValue:))
+        let updatedAt = d.object(forKey: AuthCache.updatedAt) as? Date
+        return (isLoggedIn, userId, role, updatedAt)
+    }
+
+    private func saveAuthCache(isLoggedIn: Bool, userId: UUID?, role: UserRole?) {
+        let d = UserDefaults.standard
+        d.set(isLoggedIn, forKey: AuthCache.isLoggedIn)
+        d.set(userId?.uuidString, forKey: AuthCache.userId)
+        d.set(role?.rawValue, forKey: AuthCache.role)
+        d.set(Date(), forKey: AuthCache.updatedAt)
+    }
+
+    private func clearAuthCache() {
+        let d = UserDefaults.standard
+        d.removeObject(forKey: AuthCache.isLoggedIn)
+        d.removeObject(forKey: AuthCache.userId)
+        d.removeObject(forKey: AuthCache.role)
+        d.removeObject(forKey: AuthCache.updatedAt)
+    }
+
 
 
 

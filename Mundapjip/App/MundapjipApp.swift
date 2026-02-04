@@ -9,10 +9,7 @@ struct MundapjipApp: App {
     @StateObject private var familyService: FamilyService
     private let qaService: QAService
 
-    @State private var isBooting: Bool = true
-    @State private var didStartAuthListener: Bool = false  // ✅ 1회 가드
-
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @State private var didStartAuthListener: Bool = false
 
     init() {
         let supabaseURL = Bundle.main.supabaseURL
@@ -21,9 +18,7 @@ struct MundapjipApp: App {
         let client = SupabaseClient(
             supabaseURL: supabaseURL,
             supabaseKey: supabaseAnonKey,
-            options: SupabaseClientOptions(
-                db: .init(schema: "public")
-            )
+            options: SupabaseClientOptions(db: .init(schema: "public"))
         )
 
         _session = StateObject(wrappedValue: SessionManager(client: client))
@@ -33,36 +28,21 @@ struct MundapjipApp: App {
 
     var body: some Scene {
         WindowGroup {
-            let manager = session
-
-            ZStack {
-                if isBooting {
-                    SplashView()
-                } else {
-                    RootView()
-                        .environmentObject(manager)
-                        .environment(\.qaService, qaService)
-                        .environmentObject(familyService)
-                        .onOpenURL { url in
-                            manager.handleOpenURL(url)
-                        }
+            RootView()
+                .environmentObject(session)
+                .environment(\.qaService, qaService)
+                .environmentObject(familyService)
+                .onOpenURL { url in
+                    session.handleOpenURL(url)
                 }
-            }
-            .task {
-                // ✅ StateObject가 View 트리에 설치된 이후에만 접근
-                if !didStartAuthListener {
-                    didStartAuthListener = true
-                    manager.startAuthListener()
+                .task {
+                    if !didStartAuthListener {
+                        didStartAuthListener = true
+                        session.startAuthListener()
+                    }
+                    // ✅ RootView는 이미 떠있고, 그 안에서 session.route == .splash 로 로딩을 보여주면 됨
+                    await session.checkAuthState()
                 }
-
-                // 최소 표시 시간 (선택)
-                try? await Task.sleep(nanoseconds: 300_000_000)
-
-                await manager.checkAuthState()
-
-                isBooting = false
-            }
         }
     }
 }
-
