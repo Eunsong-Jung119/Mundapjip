@@ -11,6 +11,9 @@ struct ProfileView: View {
     // MARK: - State
     @State private var showRoleChangedToast = false
     @State private var showLogoutAlert = false
+    @State private var showDeleteAccountAlert = false
+    @State private var isDeletingAccount = false
+    @State private var deleteError: String?
 
     // MARK: - App Version
     private var appVersion: String {
@@ -44,6 +47,23 @@ struct ProfileView: View {
 
     private func openKakaoChannelChat() {
         openURL(kakaoChannelChatURL)
+    }
+
+    private func handleDeleteAccount() {
+        Task {
+            guard !isDeletingAccount else { return }
+            isDeletingAccount = true
+            defer { isDeletingAccount = false }
+
+            do {
+                try await session.deleteAccount()
+                // 성공 시 자동으로 로그인 화면으로 이동 (SessionManager에서 처리)
+            } catch {
+                // 에러 발생 시 알럿 표시
+                deleteError = "탈퇴 처리 중 오류가 발생했습니다.\n네트워크 연결을 확인하고 다시 시도해주세요."
+                print("❌ Delete account error: \(error)")
+            }
+        }
     }
 
     var body: some View {
@@ -100,7 +120,7 @@ struct ProfileView: View {
                             }
 
                             ProfileRow(title: "탈퇴하기", isDestructive: true) {
-                                // TODO: 탈퇴 로직 연결
+                                showDeleteAccountAlert = true
                             }
                         }
 
@@ -110,6 +130,29 @@ struct ProfileView: View {
                     .padding(.bottom, 24)
                 }
                 .background(Color.appBackground)
+
+                // MARK: - Loading
+                if isDeletingAccount {
+                    ZStack {
+                        Color.black.opacity(0.3)
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 12) {
+                            ProgressView()
+                                .controlSize(.large)
+                                .tint(.white)
+
+                            Text("탈퇴 처리 중...")
+                                .font(.subheadline)
+                                .foregroundStyle(.white)
+                        }
+                        .padding(24)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.black.opacity(0.85))
+                        )
+                    }
+                }
 
                 // MARK: - Toast
                 if showRoleChangedToast {
@@ -135,6 +178,30 @@ struct ProfileView: View {
 
                 Button("로그아웃", role: .destructive) {
                     Task { await session.logout() }
+                }
+            }
+            .alert("정말 탈퇴하시겠어요?", isPresented: $showDeleteAccountAlert) {
+                Button("취소", role: .cancel) {}
+
+                Button("탈퇴하기", role: .destructive) {
+                    handleDeleteAccount()
+                }
+            } message: {
+                Text("• 계정 정보는 30일 후 완전히 삭제됩니다\n• 가족에게 공유한 답변은 남아있습니다\n• 답변까지 삭제하려면 탈퇴 전 직접 삭제해주세요")
+            }
+            .alert("탈퇴 실패", isPresented: Binding(
+                get: { deleteError != nil },
+                set: { if !$0 { deleteError = nil } }
+            )) {
+                Button("확인", role: .cancel) {
+                    deleteError = nil
+                }
+                Button("다시 시도") {
+                    showDeleteAccountAlert = true
+                }
+            } message: {
+                if let error = deleteError {
+                    Text(error)
                 }
             }
         }

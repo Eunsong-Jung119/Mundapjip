@@ -18,6 +18,8 @@ struct RootView: View {
 
             switch session.route {
             case .splash:
+                // ✅ init에서 캐시로 라우트 설정하므로 거의 안 보임
+                // 디버그/비상용으로만 존재
                 BootLoadingView()
 
             case .onboarding:

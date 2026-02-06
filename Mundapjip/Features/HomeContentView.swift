@@ -228,8 +228,14 @@ struct HomeContentView: View {
         do {
             questions = try await qa.loadQuestions(category: role.rawValue)
 
+            // ✅ Force cast 제거 - 안전한 옵셔널 캐스팅으로 변경
             if let fid = session.currentFamilyId {
-                answers = try await qa.loadMyAnswers(familyId: fid) as! [Int64: String]
+                if let loadedAnswers = try await qa.loadMyAnswers(familyId: fid) as? [Int64: String] {
+                    answers = loadedAnswers
+                } else {
+                    print("⚠️ 답변 데이터 타입 불일치 - 빈 딕셔너리로 초기화")
+                    answers = [:]
+                }
             }
 
             errorText = nil
@@ -239,4 +245,3 @@ struct HomeContentView: View {
         }
     }
 }
-

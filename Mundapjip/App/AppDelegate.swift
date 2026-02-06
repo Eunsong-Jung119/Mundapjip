@@ -15,9 +15,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
 
-        UNUserNotificationCenter.current().delegate = self
-        print("🚀 registerForRemoteNotifications called")
-        application.registerForRemoteNotifications()
+        // ⏱️ 백그라운드에서 실행하여 메인 스레드 블로킹 방지
+        DispatchQueue.global(qos: .utility).async {
+            DispatchQueue.main.async {
+                UNUserNotificationCenter.current().delegate = self
+            }
+        }
+
+        // ⏱️ 원격 알림 등록은 나중으로 지연 (1초 후)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            print("🚀 registerForRemoteNotifications called")
+            application.registerForRemoteNotifications()
+        }
 
         return true
     }

@@ -45,8 +45,8 @@ struct QuestionAnswerSheet: View {
         didRequestInitialFocus = true
 
         Task { @MainActor in
-            // 시트 애니메이션 종료 이후에 포커스 주기 (0.30~0.45 사이 조절)
-            try? await Task.sleep(nanoseconds: 380_000_000)
+            // ⚡️ 지연 시간을 50ms로 단축 (시트 애니메이션과 거의 동시에 키보드 표시)
+            try? await Task.sleep(nanoseconds: 50_000_000)
             focusing = true
         }
     }
@@ -164,8 +164,8 @@ struct QuestionAnswerSheet: View {
             .padding(.top, 12)
         }
         .onAppear {
-            focusing = false              // ✅ 초기엔 인터랙션 우선
-            requestInitialFocusOnce()     // ✅ 포커스 1회만, 늦게
+            // ⚡️ 불필요한 focusing = false 제거 (기본값이 이미 false)
+            requestInitialFocusOnce()     // ✅ 포커스 1회만, 빠르게
         }
         .onDisappear {
             let snapshotAnswers = answers

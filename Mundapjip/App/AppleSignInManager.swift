@@ -11,6 +11,14 @@ final class AppleSignInManager: NSObject {
         let nonce: String
     }
 
+    // ✅ 에러 타입 정의
+    enum SignInError: Error {
+        case userCanceled           // 사용자가 취소함
+        case credentialMissing      // 자격 증명 누락
+        case tokenMissing           // 토큰 누락
+        case unknownError(Error)    // 기타 에러
+    }
+
     private var continuation: CheckedContinuation<Token, Error>?
     private var currentNonce: String?
 
@@ -46,7 +54,7 @@ extension AppleSignInManager: ASAuthorizationControllerDelegate {
             let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
             let nonce = currentNonce
         else {
-            continuation?.resume(throwing: NSError(domain: "AppleSignIn", code: -1))
+            continuation?.resume(throwing: SignInError.credentialMissing)
             continuation = nil
             return
         }
@@ -54,7 +62,7 @@ extension AppleSignInManager: ASAuthorizationControllerDelegate {
         guard let identityToken = credential.identityToken,
               let idToken = String(data: identityToken, encoding: .utf8)
         else {
-            continuation?.resume(throwing: NSError(domain: "AppleSignIn", code: -2))
+            continuation?.resume(throwing: SignInError.tokenMissing)
             continuation = nil
             return
         }
@@ -64,7 +72,14 @@ extension AppleSignInManager: ASAuthorizationControllerDelegate {
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        continuation?.resume(throwing: error)
+        // ✅ 사용자 취소인지 확인
+        let nsError = error as NSError
+        if nsError.domain == ASAuthorizationError.errorDomain,
+           nsError.code == ASAuthorizationError.canceled.rawValue {
+            continuation?.resume(throwing: SignInError.userCanceled)
+        } else {
+            continuation?.resume(throwing: SignInError.unknownError(error))
+        }
         continuation = nil
     }
 }

@@ -18,8 +18,12 @@ final class SessionManager: ObservableObject {
     private var familyChannel: RealtimeChannel?
     private var authListener: Any?
     private var isLoggingOut = false
+    private var isDeletingAccount = false
     private var isWarmingUp = false
     private var isCheckingAuth = false
+
+    // ⏱️ 앱 시작 시간 측정 (static이므로 앱 생명주기 동안 유지)
+    private static let appLaunchTime = Date()
     
 
 
@@ -33,6 +37,10 @@ final class SessionManager: ObservableObject {
     enum FamilyError: Error {
         case unexpectedResponse
     }
+
+    enum AccountError: Error {
+        case accountDeleted
+    }
     
     private enum AuthCache {
         static let isLoggedIn = "auth.cache.isLoggedIn"
@@ -42,7 +50,26 @@ final class SessionManager: ObservableObject {
     }
 
 
-    @Published var route: Route = .splash
+    @Published var route: Route = .splash {
+        didSet {
+            // ⏱️ 첫 화면 렌더링 시간 측정
+            if oldValue == .splash && route != .splash {
+                let launchDuration = Date().timeIntervalSince(Self.appLaunchTime) * 1000
+                print("⏱️ [Launch] First screen rendered in \(String(format: "%.0f", launchDuration))ms (route: \(route))")
+
+                // 정상 범위 판단
+                if launchDuration < 500 {
+                    print("✅ [Launch] Excellent! Launch time is under 500ms")
+                } else if launchDuration < 1000 {
+                    print("✅ [Launch] Good! Launch time is under 1 second")
+                } else if launchDuration < 2000 {
+                    print("⚠️ [Launch] Acceptable but could be improved (1-2 seconds)")
+                } else {
+                    print("❌ [Launch] Slow launch (>2 seconds) - needs optimization")
+                }
+            }
+        }
+    }
     @Published var currentTab: Tab = .home
     @Published var rootResetToken = UUID()
     @Published var currentUserId: UUID?
@@ -56,6 +83,7 @@ final class SessionManager: ObservableObject {
     @Published var currentUserRole: UserRole?
     @AppStorage("hasRequestedPushPermission")
     var hasRequestedPushPermission: Bool = false
+    @Published var accountDeletedError: Bool = false
     
 
     // MARK: - Family State
@@ -68,21 +96,56 @@ final class SessionManager: ObservableObject {
     // MARK: - Init
     init(client: SupabaseClient) {
         self.client = client
-        // 🚫 여기서는 checkAuthState() 호출 안 함
-        // 👉 앱 시작 시에는 MundapjipApp.swift 에서 .task { await session.checkAuthState() } 로 한 번만 실행
+        // ✅ 캐시로 즉시 라우트 설정 (네트워크 호출 없음)
+        self.route = self.getInitialRouteFromCache()
+        print("[init] initial route from cache:", self.route)
+    }
+
+    /// 캐시만 사용하여 초기 라우트 결정 (네트워크 호출 없음)
+    private func getInitialRouteFromCache() -> Route {
+        let cache = loadAuthCache()
+        let cacheTTL: TimeInterval = 60 * 60 * 24 // 24시간
+
+        if cache.isLoggedIn,
+           let cachedUid = cache.userId,
+           let updatedAt = cache.updatedAt,
+           Date().timeIntervalSince(updatedAt) < cacheTTL {
+
+            // 캐시된 상태를 published 프로퍼티에 적용
+            isLoggedIn = true
+            currentUserId = cachedUid
+            currentUserRole = cache.role
+            // ⭐️ 중요: role이 캐시에 존재할 때만 true
+            hasResolvedRole = cache.role != nil
+
+            // 라우트 결정
+            if !hasSeenOnboarding { return .onboarding }
+            if cache.role == nil { return .selectRole }
+            return .home
+        }
+
+        // 유효한 캐시가 없으면 로그인/온보딩
+        // ⭐️ 중요: hasResolvedRole은 false 유지 (기본값)
+        return hasSeenOnboarding ? .login : .onboarding
     }
 
     // MARK: - Check Auth State
 
     @MainActor
     func checkAuthState() async {
+        let checkStartTime = Date()
+
         // ✅ 동시 실행만 막기
         if isCheckingAuth {
             print("[auth] checkAuthState blocked (in-flight)")
             return
         }
         isCheckingAuth = true
-        defer { isCheckingAuth = false }
+        defer {
+            isCheckingAuth = false
+            let checkDuration = Date().timeIntervalSince(checkStartTime) * 1000
+            print("⏱️ [Auth] checkAuthState completed in \(String(format: "%.0f", checkDuration))ms")
+        }
         
         // ✅ 이미 홈 화면이면 재계산 스킵
         if route == .home {
@@ -121,19 +184,32 @@ final class SessionManager: ObservableObject {
             let uid = session.user.id
             currentUserId = uid
 
-            requestPushPermissionIfNeeded()
+            // ⏱️ Push 권한 요청은 나중으로 지연 (메인 스레드 블로킹 방지)
+            // requestPushPermissionIfNeeded() - postLoginWarmUp에서 처리
 
-            // ✅ 2) role 조회 (타임아웃)
+            // ✅ 2) role 조회 + deleted_at 체크 (타임아웃)
             let userIdLower = uid.uuidString.lowercased()
             let role: UserRole? = try await withTimeout(seconds: 2.0) {
-                struct RoleRow: Decodable { let role: String? }
+                struct RoleRow: Decodable {
+                    let role: String?
+                    let deleted_at: String?
+                }
                 let rows: [RoleRow] = try await self.client
                     .from("user_roles")
-                    .select("role")
+                    .select("role, deleted_at")
                     .eq("user_id", value: userIdLower)
                     .limit(1)
                     .execute()
                     .value
+
+                // ✅ 탈퇴된 계정 체크
+                if let firstRow = rows.first, firstRow.deleted_at != nil {
+                    print("❌ Account is deleted (deleted_at exists)")
+                    await MainActor.run {
+                        self.accountDeletedError = true
+                    }
+                    throw AccountError.accountDeleted
+                }
 
                 if let r = rows.first?.role {
                     return UserRole(rawValue: r)
@@ -158,7 +234,32 @@ final class SessionManager: ObservableObject {
 
         } catch is TimeoutError {
             print("[auth][timeout] checkAuthState timed out")
-            return
+
+            // ✅ 타임아웃 시에도 적절한 라우트 설정
+            let cache = loadAuthCache()
+            if cache.isLoggedIn, cache.userId != nil, cache.updatedAt != nil {
+                print("[auth][timeout] using cached state")
+                // 캐시된 라우트 유지
+            } else {
+                // 캐시 없으면 로그인으로
+                clearAuthCache()
+                currentUserId = nil
+                isLoggedIn = false
+                currentUserRole = nil
+                hasResolvedRole = false
+                route = hasSeenOnboarding ? .login : .onboarding
+            }
+
+        } catch is AccountError {
+            // ✅ 탈퇴된 계정: 강제 로그아웃
+            print("[auth][deleted] Account is deleted - forcing logout")
+            accountDeletedError = true
+            clearAuthCache()
+            currentUserId = nil
+            isLoggedIn = false
+            currentUserRole = nil
+            hasResolvedRole = false
+            route = hasSeenOnboarding ? .login : .onboarding
 
         } catch {
             let msg = String(describing: error)
@@ -176,6 +277,7 @@ final class SessionManager: ObservableObject {
             currentUserId = nil
             isLoggedIn = false
             currentUserRole = nil
+            hasResolvedRole = false  // ✅ 추가: 에러 시 상태 초기화
             route = hasSeenOnboarding ? .login : .onboarding
         }
 
@@ -188,14 +290,28 @@ final class SessionManager: ObservableObject {
         if isWarmingUp { return }
         isWarmingUp = true
         defer { isWarmingUp = false }
-        
-        await ensureFamilyForUserIfNeeded()
-        await initialLoadFamilyId(userId: userId)
-        await refreshAnswerState(userId: userId)
 
-        if let token = PushTokenStore.shared.pendingToken {
-            await PushTokenManager.shared.save(token: token)
-            PushTokenStore.shared.pendingToken = nil
+        // ✅ 모든 warmup 작업을 병렬로 실행
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { await self.ensureFamilyForUserIfNeeded() }
+            group.addTask { await self.initialLoadFamilyId(userId: userId) }
+            group.addTask { await self.refreshAnswerState(userId: userId) }
+            group.addTask {
+                if let token = await PushTokenStore.shared.pendingToken {
+                    await PushTokenManager.shared.save(token: token)
+                    await MainActor.run {
+                        PushTokenStore.shared.pendingToken = nil
+                    }
+                }
+            }
+        }
+
+        // ⏱️ 푸시 권한 요청은 5초 후에 (사용자가 앱에 익숙해진 후)
+        Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 5_000_000_000) // 5초
+            await MainActor.run {
+                self?.requestPushPermissionIfNeeded()
+            }
         }
     }
     
@@ -205,14 +321,25 @@ final class SessionManager: ObservableObject {
         do {
             let userIdLower = userId.uuidString.lowercased()
 
-            struct RoleRow: Decodable { let role: String? }
+            struct RoleRow: Decodable {
+                let role: String?
+                let deleted_at: String?
+            }
             let roleRows: [RoleRow] = try await client
                 .from("user_roles")
-                .select("role")
+                .select("role, deleted_at")
                 .eq("user_id", value: userIdLower)
                 .limit(1)
                 .execute()
                 .value
+
+            // ✅ 탈퇴된 계정 체크
+            if let firstRow = roleRows.first, firstRow.deleted_at != nil {
+                print("❌ Account is deleted (deleted_at exists) - forcing logout")
+                accountDeletedError = true
+                await logout()
+                return
+            }
 
             let role = roleRows.first?.role.flatMap(UserRole.init(rawValue:))
 
@@ -229,22 +356,19 @@ final class SessionManager: ObservableObject {
 
 
     
-    func startAuthListener() {
+    func startAuthListener() async {
         if authListener != nil { return }
 
-        Task { [weak self] in
+        // ✅ 비동기로 변경하여 블로킹 방지
+        self.authListener = await self.client.auth.onAuthStateChange { [weak self] _, _ in
             guard let self else { return }
 
-            self.authListener = await self.client.auth.onAuthStateChange { [weak self] _, _ in
-                guard let self else { return }
+            Task { @MainActor in
+                // ✅ 메인 액터에서만 접근
+                if self.isLoggingOut { return }
 
-                Task { @MainActor in
-                    // ✅ 메인 액터에서만 접근
-                    if self.isLoggingOut { return }
-
-                    self.hasRunAuthCheck = false
-                    await self.checkAuthState()
-                }
+                self.hasRunAuthCheck = false
+                await self.checkAuthState()
             }
         }
     }
@@ -366,10 +490,81 @@ final class SessionManager: ObservableObject {
         otherHasAnswered = false
 
         currentTab = .home
+        accountDeletedError = false
 
         // 4) 라우트 전환 + 루트 뷰 강제 재생성
         route = .login
         rootResetToken = UUID()
+    }
+
+    // MARK: - Delete Account
+    @MainActor
+    func deleteAccount() async throws {
+        guard !isDeletingAccount else { return } // ✅ 중복 실행 방지
+        isDeletingAccount = true
+        defer { isDeletingAccount = false }
+
+        // 1) 현재 사용자 ID 가져오기
+        let session = try await client.auth.session
+        let userId = session.user.id
+
+        // 2) user_roles 테이블의 deleted_at 업데이트 (soft delete)
+        struct DeletePayload: Encodable {
+            let deleted_at: String
+        }
+
+        let payload = DeletePayload(
+            deleted_at: ISO8601DateFormatter().string(from: Date())
+        )
+
+        _ = try await client
+            .from("user_roles")
+            .update(payload)
+            .eq("user_id", value: userId)
+            .execute()
+
+        print("✅ Account marked as deleted (deleted_at updated)")
+
+        // 3) 로컬 캐시 제거
+        clearAuthCache()
+
+        // 4) 실시간 구독 종료
+        do {
+            try await familyChannel?.unsubscribe()
+        } catch {
+            print("⚠️ unsubscribe error: \(error)")
+        }
+        familyChannel = nil
+
+        // 5) Supabase signOut
+        do {
+            try await client.auth.signOut()
+        } catch {
+            print("❌ signOut error: \(error)")
+            // signOut 실패해도 로컬은 로그아웃 상태로 만들기
+        }
+
+        // 6) 세션/상태 완전 초기화
+        hasRunAuthCheck = false
+
+        isLoggedIn = false
+        currentUserId = nil
+        currentUserRole = nil
+
+        currentFamilyId = nil
+        familyPaired = false
+        hasPairedMember = false
+
+        hasAnswered = false
+        otherHasAnswered = false
+
+        currentTab = .home
+
+        // 7) 라우트 전환 + 루트 뷰 강제 재생성
+        route = .login
+        rootResetToken = UUID()
+
+        print("✅ Account deletion completed - user signed out")
     }
 
     // MARK: - Public API (View에서 호출)
@@ -412,22 +607,24 @@ final class SessionManager: ObservableObject {
 
     // MARK: - Routing
     private func decideRouteAfterLogin() {
+        let newRoute: Route
+
         if !hasSeenOnboarding {
-            route = .onboarding
+            newRoute = .onboarding
+        } else if !hasResolvedRole {
+            // ✅ 실제 역할을 알기 전에는 라우트 변경 안 함
             return
+        } else if currentUserRole == nil {
+            newRoute = .selectRole
+        } else {
+            newRoute = .home
         }
 
-        // ✅ role 확정 전에는 절대 selectRole로 안 감
-        if !hasResolvedRole {
-            return
+        // ✅ 라우트가 실제로 변경될 때만 업데이트 (깜빡임 방지)
+        if route != newRoute {
+            print("[route] transition: \(route) -> \(newRoute)")
+            route = newRoute
         }
-
-        if currentUserRole == nil {
-            route = .selectRole
-            return
-        }
-
-        route = .home
     }
 
     

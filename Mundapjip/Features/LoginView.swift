@@ -1,5 +1,4 @@
 
-
 //
 //  LoginView.swift
 //  Mundapjip
@@ -61,6 +60,13 @@ struct LoginView: View {
         } message: {
             Text(alertMessage)
         }
+        .alert("탈퇴된 계정입니다", isPresented: $session.accountDeletedError) {
+            Button("확인", role: .cancel) {
+                session.accountDeletedError = false
+            }
+        } message: {
+            Text("이 계정은 탈퇴 처리되었습니다.\n30일 후 완전히 삭제됩니다.")
+        }
     }
 
     // MARK: - Apple Button
@@ -90,7 +96,26 @@ struct LoginView: View {
         do {
             let token = try await appleManager.signIn()
             try await session.signInWithApple(idToken: token.idToken, nonce: token.nonce)
+        } catch let error as AppleSignInManager.SignInError {
+            // ✅ 사용자 취소는 알럿 표시 안 함
+            switch error {
+            case .userCanceled:
+                print("[Login] User canceled Apple Sign In")
+                return  // 조용히 종료
+            case .credentialMissing:
+                alertMessage = "인증 정보를 가져오지 못했어요. 다시 시도해주세요."
+                showAlert = true
+            case .tokenMissing:
+                alertMessage = "토큰을 가져오지 못했어요. 다시 시도해주세요."
+                showAlert = true
+            case .unknownError(let underlyingError):
+                print("[Login] Apple Sign In error:", underlyingError)
+                alertMessage = "애플 로그인에 실패했어요. 잠시 후 다시 시도해주세요."
+                showAlert = true
+            }
         } catch {
+            // ✅ Supabase 에러나 기타 에러
+            print("[Login] Unexpected error:", error)
             alertMessage = "애플 로그인에 실패했어요. 잠시 후 다시 시도해주세요."
             showAlert = true
         }
@@ -110,6 +135,24 @@ struct LoginView: View {
                 do {
                     try await session.signInWithKakao()
                 } catch {
+                    // ✅ ASWebAuthenticationSession 취소 에러 체크
+                    let nsError = error as NSError
+                    
+                    // ASWebAuthenticationSessionError.canceledLogin (code 1)
+                    if nsError.domain == "com.apple.AuthenticationServices.WebAuthenticationSession" && nsError.code == 1 {
+                        print("[Login] User canceled Kakao Sign In (ASWebAuthenticationSession)")
+                        return  // 알럿 표시 안 함
+                    }
+                    
+                    // 추가: 일반적인 취소 패턴도 체크
+                    let errorString = String(describing: error).lowercased()
+                    if errorString.contains("canceledlogin") || errorString.contains("user cancel") {
+                        print("[Login] User canceled Kakao Sign In")
+                        return  // 알럿 표시 안 함
+                    }
+
+                    // 실제 에러인 경우만 알럿 표시
+                    print("[Login] Kakao Sign In error:", error)
                     alertMessage = "카카오 로그인에 실패했어요. 잠시 후 다시 시도해주세요."
                     showAlert = true
                 }

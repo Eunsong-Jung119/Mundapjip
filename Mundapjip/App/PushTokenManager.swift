@@ -17,9 +17,20 @@ final class PushTokenManager {
     /// BundleConfig에서 Supabase 설정을 읽어 클라이언트 생성
     private let client: SupabaseClient = {
         let bundle = Bundle.main
+
+        // ⏱️ 커스텀 URLSession 설정 - 짧은 타임아웃
+        let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.timeoutIntervalForRequest = 2.0  // 요청 타임아웃: 2초
+        sessionConfig.timeoutIntervalForResource = 5.0 // 전체 리소스 타임아웃: 5초
+        sessionConfig.waitsForConnectivity = false
+        let customSession = URLSession(configuration: sessionConfig)
+
         return SupabaseClient(
             supabaseURL: bundle.supabaseURL,
-            supabaseKey: bundle.supabaseAnonKey
+            supabaseKey: bundle.supabaseAnonKey,
+            options: SupabaseClientOptions(
+                global: .init(session: customSession)
+            )
         )
     }()
 
