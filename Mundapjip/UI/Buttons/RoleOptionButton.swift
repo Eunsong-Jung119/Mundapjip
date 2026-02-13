@@ -30,7 +30,7 @@ struct RoleOptionStyle: ButtonStyle {
     var isSelected: Bool
 
     private let selectedFill = Color("#EEE9E3")
-    private let brand = Color("#B9A288")
+    private let brand = Color.brandPrimary
 
     func makeBody(configuration: Configuration) -> some View {
         let isPressed = configuration.isPressed

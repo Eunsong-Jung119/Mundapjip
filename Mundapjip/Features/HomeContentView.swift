@@ -57,7 +57,11 @@ struct HomeContentView: View {
             answerSheet
         }
         .alert(submitAlert ?? "", isPresented: isSubmitAlertPresented) {
-            Button("확인") { submitAlert = nil }
+            Button("확인") {
+                submitAlert = nil
+                // ✅ 여기서 호출 (사용자가 확인 누른 후 화면 전환)
+                Task { await session.refreshAnswerState() }
+            }
         }
     }
 
@@ -210,9 +214,11 @@ struct HomeContentView: View {
         do {
             try await qaService.submitAnswers(familyId: familyId, answers: answers)
             submitAlert = "제출이 완료되었습니다."
-            await session.refreshAnswerState()
+            // ❌ 기존: await session.refreshAnswerState()
+            // ✅ 수정: alert "확인" 버튼 누른 후로 이동
         } catch {
             print("❌ 제출 실패")
+            submitAlert = "제출에 실패했어요. 다시 시도해주세요."
         }
     }
 

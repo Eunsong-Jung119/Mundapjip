@@ -50,7 +50,7 @@ extension Color {
 
     // MARK: - Brand (🔥 여기서 기준 잡기)
     /// 메인 브랜드 컬러
-    static let brandPrimary = Color("#B9A288")
+    static let brandPrimary = Color("#A58163")
 
     /// 메인 브랜드 컬러의 약한 버전 (버튼 pressed, 서브 강조용)
     static let brandPrimaryDim = Color("#B9A288").opacity(0.85)

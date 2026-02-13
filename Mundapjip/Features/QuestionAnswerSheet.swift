@@ -1,4 +1,5 @@
 
+
 import SwiftUI
 
 struct QuestionAnswerSheet: View {
@@ -69,7 +70,7 @@ struct QuestionAnswerSheet: View {
 
     var body: some View {
         ZStack {
-            Color(red: 0.98, green: 0.96, blue: 0.94)
+            Color.appBackground
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 16) {
@@ -90,20 +91,25 @@ struct QuestionAnswerSheet: View {
                 .contentShape(Rectangle()) // ✅ 헤더 탭/드래그 반응 개선
 
                 Rectangle()
-                    .fill(Color.brown.opacity(0.85))
+                    .fill(Color.brandPrimary.opacity(0.85))
                     .frame(height: 2)
 
                 // 질문
                 Text(q.body)
                     .font(.title3.weight(.semibold))
+                    .tracking(-0.3)
                     .fixedSize(horizontal: false, vertical: true)
 
                 // 입력
                 ZStack(alignment: .topLeading) {
                     TextEditor(text: answerBinding)
+                        .font(.system(size: 17, weight: .regular))
+                        .tracking(-0.4)
+                        .lineSpacing(5)
                         .focused($focusing)
                         .frame(minHeight: 160)
-                        .padding(12)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
                                 .fill(Color.white)
@@ -115,9 +121,11 @@ struct QuestionAnswerSheet: View {
 
                     if (answers[q.id] ?? "").isEmpty && !focusing {
                         Text("답변을 입력해 주세요.")
+                            .font(.system(size: 17, weight: .regular))
+                            .tracking(-0.4)
                             .foregroundStyle(.secondary)
-                            .padding(.top, 18)
-                            .padding(.leading, 18)
+                            .padding(.top, 22)
+                            .padding(.leading, 24)
                             .allowsHitTesting(false)
                     }
                 }
@@ -175,4 +183,3 @@ struct QuestionAnswerSheet: View {
         }
     }
 }
-

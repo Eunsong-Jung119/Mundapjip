@@ -227,7 +227,7 @@ struct ConnectFamilySheet: View {
             .disabled(inputCode.count != 6 || isLoading)
             .frame(maxWidth: .infinity)
             .frame(height: 52)
-            .background(Color.brown.opacity(inputCode.count == 6 ? 1 : 0.5))
+            .background(Color.brandPrimary.opacity(inputCode.count == 6 ? 1 : 0.5))
             .foregroundColor(.white)
             .cornerRadius(14)
         }

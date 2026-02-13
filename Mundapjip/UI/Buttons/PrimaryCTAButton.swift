@@ -23,7 +23,7 @@ extension PrimaryCTAButton {
     struct Style: ButtonStyle {
         @Environment(\.isEnabled) private var isEnabled
 
-        private let enabledBackground = Color("#B9A288")
+        private let enabledBackground = Color.brandPrimary
         private let disabledBackground = Color("#E6DED3")
 
         func makeBody(configuration: Configuration) -> some View {
