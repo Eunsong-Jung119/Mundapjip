@@ -1,8 +1,4 @@
 
-//
-//  LoginView.swift
-//  Mundapjip
-//
 
 import SwiftUI
 import AuthenticationServices
@@ -13,15 +9,17 @@ struct LoginView: View {
     private let appleManager = AppleSignInManager()
     private let buttonMaxWidth: CGFloat = 353
 
-
     // 상태
     @State private var isLoading = false
     @State private var showAlert = false
     @State private var alertMessage = "로그인에 실패했어요. 잠시 후 다시 시도해주세요."
+    
+    // ✅ 1) 이메일 로그인 시트를 띄우기 위한 상태값 추가
+    @State private var showEmailLogin = false
 
     var body: some View {
         ZStack {
-            // ✅ 1) 배경을 Splash_Background 이미지로 교체
+            // 배경
             Image("Splash_Background")
                 .resizable()
                 .scaledToFill()
@@ -30,7 +28,7 @@ struct LoginView: View {
             VStack(spacing: 0) {
                 Spacer()
 
-                // ✅ 2) 텍스트 로고 → 이미지 로고로 교체
+                // 로고
                 Image("Mundapjip_Logo_Text")
                     .resizable()
                     .scaledToFit()
@@ -43,7 +41,11 @@ struct LoginView: View {
 
                 Spacer()
 
-                VStack(spacing: 16) {
+                // 버튼 영역
+                VStack(spacing: 12) {
+                    // ✅ 2) 심사위원을 위한 이메일 로그인 버튼 배치
+                    emailLoginButton
+                    
                     appleButton
                         .disabled(isLoading)
 
@@ -52,41 +54,54 @@ struct LoginView: View {
                 }
                 .frame(maxWidth: buttonMaxWidth)
                 .frame(maxWidth: .infinity)
-                .padding(.bottom, 16)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 32)
             }
+            
+            if isLoading {
+                Color.black.opacity(0.1).ignoresSafeArea()
+                ProgressView()
+            }
+        }
+        // ✅ 3) 버튼 클릭 시 EmailLoginView를 풀스크린으로 띄움
+        .fullScreenCover(isPresented: $showEmailLogin) {
+            EmailLoginView()
         }
         .alert("안내", isPresented: $showAlert) {
             Button("확인", role: .cancel) { }
         } message: {
             Text(alertMessage)
         }
-        .alert("탈퇴된 계정입니다", isPresented: $session.accountDeletedError) {
-            Button("확인", role: .cancel) {
-                session.accountDeletedError = false
-            }
-        } message: {
-            Text("이 계정은 탈퇴 처리되었습니다.\n30일 후 완전히 삭제됩니다.")
+    }
+
+    // MARK: - Email Login Button (New!)
+    private var emailLoginButton: some View {
+        Button {
+            showEmailLogin = true
+        } label: {
+            Text("이메일로 로그인")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                // Assets에 등록된 브랜드 컬러를 쓰거나, 없으면 Color.brown 등으로 지정
+                .background(Color.brandPrimary)
+                .cornerRadius(12)
         }
     }
 
     // MARK: - Apple Button
-
     private var appleButton: some View {
         AppleSignInButton(
             type: .continue,
             style: .black,
             cornerRadius: 12
         ) {
-            // ✅ 기존 SignInWithAppleButton의 onRequest/onCompletion 로직은
-            // 여기서 AppleSignInManager + ASAuthorizationController로 실행해야 함.
-            // (아래에 "그대로 쓰는 방법"을 바로 적어둘게)
             Task { await startAppleLoginFlow() }
         }
         .frame(height: 56)
     }
 
-
-    
     @MainActor
     private func startAppleLoginFlow() async {
         guard !isLoading else { return }
@@ -96,64 +111,25 @@ struct LoginView: View {
         do {
             let token = try await appleManager.signIn()
             try await session.signInWithApple(idToken: token.idToken, nonce: token.nonce)
-        } catch let error as AppleSignInManager.SignInError {
-            // ✅ 사용자 취소는 알럿 표시 안 함
-            switch error {
-            case .userCanceled:
-                print("[Login] User canceled Apple Sign In")
-                return  // 조용히 종료
-            case .credentialMissing:
-                alertMessage = "인증 정보를 가져오지 못했어요. 다시 시도해주세요."
-                showAlert = true
-            case .tokenMissing:
-                alertMessage = "토큰을 가져오지 못했어요. 다시 시도해주세요."
-                showAlert = true
-            case .unknownError(let underlyingError):
-                print("[Login] Apple Sign In error:", underlyingError)
-                alertMessage = "애플 로그인에 실패했어요. 잠시 후 다시 시도해주세요."
-                showAlert = true
-            }
         } catch {
-            // ✅ Supabase 에러나 기타 에러
-            print("[Login] Unexpected error:", error)
-            alertMessage = "애플 로그인에 실패했어요. 잠시 후 다시 시도해주세요."
+            print("[Login] Apple Sign In error:", error)
+            alertMessage = "애플 로그인에 실패했어요."
             showAlert = true
         }
     }
 
-
-
     // MARK: - Kakao Button
-
     private var kakaoButton: some View {
         Button {
             Task {
                 guard !isLoading else { return }
                 isLoading = true
                 defer { isLoading = false }
-
                 do {
                     try await session.signInWithKakao()
                 } catch {
-                    // ✅ ASWebAuthenticationSession 취소 에러 체크
-                    let nsError = error as NSError
-                    
-                    // ASWebAuthenticationSessionError.canceledLogin (code 1)
-                    if nsError.domain == "com.apple.AuthenticationServices.WebAuthenticationSession" && nsError.code == 1 {
-                        print("[Login] User canceled Kakao Sign In (ASWebAuthenticationSession)")
-                        return  // 알럿 표시 안 함
-                    }
-                    
-                    // 추가: 일반적인 취소 패턴도 체크
-                    let errorString = String(describing: error).lowercased()
-                    if errorString.contains("canceledlogin") || errorString.contains("user cancel") {
-                        print("[Login] User canceled Kakao Sign In")
-                        return  // 알럿 표시 안 함
-                    }
-
-                    // 실제 에러인 경우만 알럿 표시
-                    print("[Login] Kakao Sign In error:", error)
-                    alertMessage = "카카오 로그인에 실패했어요. 잠시 후 다시 시도해주세요."
+                    print("[Login] Kakao error:", error)
+                    alertMessage = "카카오 로그인에 실패했어요."
                     showAlert = true
                 }
             }
@@ -166,8 +142,4 @@ struct LoginView: View {
         }
         .buttonStyle(.plain)
     }
-}
-
-#Preview{
-    LoginView()
 }

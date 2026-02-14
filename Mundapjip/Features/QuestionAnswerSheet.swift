@@ -98,7 +98,11 @@ struct QuestionAnswerSheet: View {
                 Text(q.body)
                     .font(.title3.weight(.semibold))
                     .tracking(-0.3)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(nil)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true) // ✅ 다시 추가
+                    .environment(\.layoutDirection, .leftToRight)
 
                 // 입력
                 ZStack(alignment: .topLeading) {

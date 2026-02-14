@@ -198,6 +198,8 @@ struct HomeContentView: View {
                 submissionId: nil
             )
         }
+        
+        session.cachedAnswers = allAnswers // ✅ 캐시 업데이트
     }
 
     // MARK: - Submit (Final)
@@ -225,6 +227,12 @@ struct HomeContentView: View {
     // MARK: - Load
 
     private func load() async {
+        // ✅ 이미 캐시된 데이터 있으면 바로 사용
+        if !session.cachedAnswers.isEmpty {
+            answers = session.cachedAnswers
+            return
+        }
+        
         loading = true
         defer { loading = false }
 
@@ -234,10 +242,10 @@ struct HomeContentView: View {
         do {
             questions = try await qa.loadQuestions(category: role.rawValue)
 
-            // ✅ Force cast 제거 - 안전한 옵셔널 캐스팅으로 변경
             if let fid = session.currentFamilyId {
                 if let loadedAnswers = try await qa.loadMyAnswers(familyId: fid) as? [Int64: String] {
                     answers = loadedAnswers
+                    session.cachedAnswers = loadedAnswers // ✅ 캐시 저장
                 } else {
                     print("⚠️ 답변 데이터 타입 불일치 - 빈 딕셔너리로 초기화")
                     answers = [:]

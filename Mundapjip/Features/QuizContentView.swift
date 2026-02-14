@@ -41,7 +41,8 @@ struct QuizContentView: View {
         .onAppear {
             Task {
                 await session.refreshFamilyPairingState()
-                isFamilyStateReady = true   // 🔥 여기서 단 한 번 true
+                await session.refreshAnswerState()
+                isFamilyStateReady = true    
             }
         }
     }

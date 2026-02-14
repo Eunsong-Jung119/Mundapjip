@@ -92,6 +92,8 @@ final class SessionManager: ObservableObject {
     @Published var hasPairedMember: Bool = false
     @Published var hasAnswered: Bool = false
     @Published var otherHasAnswered: Bool = false
+    @Published var cachedAnswers: [Int64: String] = [:]
+
 
     // MARK: - Init
     init(client: SupabaseClient) {
@@ -491,10 +493,15 @@ final class SessionManager: ObservableObject {
 
         currentTab = .home
         accountDeletedError = false
+        
+        //5) 캐시 초기화
+        cachedAnswers = [:]
 
-        // 4) 라우트 전환 + 루트 뷰 강제 재생성
+        // 6) 라우트 전환 + 루트 뷰 강제 재생성
         route = .login
         rootResetToken = UUID()
+        
+        
     }
 
     // MARK: - Delete Account
