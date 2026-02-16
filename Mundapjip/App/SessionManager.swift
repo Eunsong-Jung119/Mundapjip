@@ -84,7 +84,9 @@ final class SessionManager: ObservableObject {
     @AppStorage("hasRequestedPushPermission")
     var hasRequestedPushPermission: Bool = false
     @Published var accountDeletedError: Bool = false
-    
+
+    // MARK: - Purchase State
+    @Published var isPurchased: Bool = UserDefaults.standard.bool(forKey: "store.isPurchased")
 
     // MARK: - Family State
     @Published var currentFamilyId: UUID?
@@ -134,6 +136,13 @@ final class SessionManager: ObservableObject {
     // MARK: - Check Auth State
 
     @MainActor
+    /// StoreKit 구매 상태를 확인하여 isPurchased를 갱신합니다.
+    func checkPurchaseStatus() async {
+        let storeManager = StoreManager()
+        await storeManager.checkPurchaseStatus()
+        isPurchased = storeManager.isPurchased
+    }
+
     func checkAuthState() async {
         let checkStartTime = Date()
 

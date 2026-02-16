@@ -17,7 +17,7 @@ struct PaymentBannerView: View {
             Image("PayBanner")
                 .resizable()
                 .scaledToFill()
-                .frame(width: 353, height: 80)
+                .frame(height: 80)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
 
             HStack(spacing: 0) {
@@ -40,7 +40,8 @@ struct PaymentBannerView: View {
             }
             .padding(.horizontal, 20)
         }
-        .frame(width: 353, height: 80)
+        .frame(height: 80)
+        .frame(maxWidth: .infinity)
     }
 }
 

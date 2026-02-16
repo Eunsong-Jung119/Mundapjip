@@ -224,20 +224,21 @@ struct CompleteAnswerContentView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 16) {
-                        // ✅ 결제 유도 배너 - Button으로 변경
-                        Button {
-                            navigateToPayView = true
-                        } label: {
-                            PaymentBannerView()
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.horizontal, 20)
-                        .background(
-                            NavigationLink(destination: PayView(), isActive: $navigateToPayView) {
-                                EmptyView()
+                        // 결제 유도 배너 (구매 완료 시 숨김)
+                        if !session.isPurchased {
+                            Button {
+                                navigateToPayView = true
+                            } label: {
+                                PaymentBannerView()
                             }
-                            .hidden()
-                        )
+                            .buttonStyle(.plain)
+                            .background(
+                                NavigationLink(destination: PayView(), isActive: $navigateToPayView) {
+                                    EmptyView()
+                                }
+                                .hidden()
+                            )
+                        }
                         
                         ForEach(Array(vm.items.enumerated()), id: \.offset) { index, item in
                             NavigationLink(value: item) {

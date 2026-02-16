@@ -1,0 +1,48 @@
+{
+  "identifier" : "8A5F3B2E-1C4D-4E6F-9A8B-7D0E2F1C3A5B",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "4900",
+      "familyShareable" : false,
+      "internalID" : "D1E2F3A4-5B6C-7D8E-9F0A-1B2C3D4E5F6A",
+      "localizations" : [
+        {
+          "description" : "모든 답변을 영구적으로 소장할 수 있습니다.",
+          "displayName" : "문답집 영구소장",
+          "locale" : "ko"
+        },
+        {
+          "description" : "Own all answers permanently.",
+          "displayName" : "Permanent Ownership",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.eunsong.mundapjip.permanentOwnership",
+      "referenceName" : "Permanent Ownership",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "APP_INTERNAL_ID",
+    "_developerTeamID" : "TEAM_ID",
+    "_lastSynchronizedDate" : "2026-02-16T00:00:00Z",
+    "_storefrontCountryCode" : "KOR",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

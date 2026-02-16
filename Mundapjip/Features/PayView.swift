@@ -1,4 +1,3 @@
-
 //
 //  PayView.swift
 //  Mundapjip
@@ -11,7 +10,12 @@ import StoreKit
 
 struct PayView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var isSelected = false  // ✅ 추가
+    @EnvironmentObject private var session: SessionManager
+    @StateObject private var storeManager = StoreManager()
+
+    @State private var isSelected = false
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -19,7 +23,7 @@ struct PayView: View {
             // MARK: - Main Content
             VStack(alignment: .leading, spacing: 24) {
 
-                // ✅ Header
+                // Header
                 TitleSubtitle(
                     title: "문답집을 영구소장 하시겠어요?",
                     subtitle: "무료 버전에서는 7일 동안만 답변을 열람할 수 있어요",
@@ -28,9 +32,9 @@ struct PayView: View {
                 )
                 .padding(.top, 72)
 
-                // ✅ RoleOptionButton 재사용
+                // RoleOptionButton 재사용
                 RoleOptionButton(
-                    title: "4,900원",
+                    title: storeManager.product?.displayPrice ?? "4,900원",
                     isSelected: isSelected
                 ) {
                     isSelected.toggle()
@@ -51,11 +55,28 @@ struct PayView: View {
 
                 Spacer(minLength: 32)
 
-                // ✅ CTA - 선택해야 활성화
-                PrimaryCTAButton(title: "문답집 구매하기") {
-                    // TODO: StoreKit 결제 연결
+                // CTA - 선택해야 활성화
+                PrimaryCTAButton(title: purchaseButtonTitle) {
+                    Task {
+                        await storeManager.purchase()
+                        handlePurchaseResult()
+                    }
                 }
-                .disabled(!isSelected)
+                .disabled(!isSelected || isPurchasing)
+                .padding(.bottom, 8)
+
+                // 복원 버튼
+                Button {
+                    Task {
+                        await storeManager.restore()
+                        handlePurchaseResult()
+                    }
+                } label: {
+                    Text("이전 구매 복원하기")
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundStyle(Color.brandSecondary)
+                        .frame(maxWidth: .infinity)
+                }
                 .padding(.bottom, 24)
             }
             .padding(.horizontal, 20)
@@ -77,9 +98,42 @@ struct PayView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
+        .task {
+            await storeManager.loadProduct()
+        }
+        .alert("알림", isPresented: $showErrorAlert) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
+    }
+
+    // MARK: - Helpers
+
+    private var isPurchasing: Bool {
+        if case .purchasing = storeManager.purchaseState { return true }
+        return false
+    }
+
+    private var purchaseButtonTitle: String {
+        if case .purchasing = storeManager.purchaseState {
+            return "결제 중..."
+        }
+        return "문답집 구매하기"
+    }
+
+    private func handlePurchaseResult() {
+        switch storeManager.purchaseState {
+        case .purchased:
+            session.isPurchased = true
+            dismiss()
+        case .failed(let message):
+            errorMessage = message
+            showErrorAlert = true
+        default:
+            break
+        }
     }
 }
 
-#Preview {
-    PayView()
-}
+
