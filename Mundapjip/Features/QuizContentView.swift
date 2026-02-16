@@ -194,21 +194,6 @@ struct CompleteAnswerContentView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
             
-            // ✅ 결제 유도 배너 - Button으로 변경
-            Button {
-                navigateToPayView = true
-            } label: {
-                PaymentBannerView()
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 16)
-            .background(
-                NavigationLink(destination: PayView(), isActive: $navigateToPayView) {
-                    EmptyView()
-                }
-                .hidden()
-            )
 
             if vm.isLoading {
                 VStack {
@@ -239,6 +224,21 @@ struct CompleteAnswerContentView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 16) {
+                        // ✅ 결제 유도 배너 - Button으로 변경
+                        Button {
+                            navigateToPayView = true
+                        } label: {
+                            PaymentBannerView()
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 20)
+                        .background(
+                            NavigationLink(destination: PayView(), isActive: $navigateToPayView) {
+                                EmptyView()
+                            }
+                            .hidden()
+                        )
+                        
                         ForEach(Array(vm.items.enumerated()), id: \.offset) { index, item in
                             NavigationLink(value: item) {
                                 AnswerChevronRow(
