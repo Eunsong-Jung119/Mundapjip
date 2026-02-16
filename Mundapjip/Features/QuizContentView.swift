@@ -79,7 +79,9 @@ struct QuizContentView: View {
                             WaitingForOtherView(otherRole: otherRoleTitle)
 
                         case .bothAnswered:
-                            CompleteAnswerView()
+                            NavigationStack {
+                                CompleteAnswerView()
+                            }
                         }
                     }
 
@@ -174,6 +176,7 @@ struct CompleteAnswerContentView: View {
     let client: SupabaseClient
 
     @StateObject private var vm = CompleteAnswerViewModel()
+    @State private var navigateToPayView = false
 
     private let captionColor = Color("#7B6A5C")
 
@@ -190,6 +193,22 @@ struct CompleteAnswerContentView: View {
             .padding(.top, 16)
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
+            
+            // ✅ 결제 유도 배너 - Button으로 변경
+            Button {
+                navigateToPayView = true
+            } label: {
+                PaymentBannerView()
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 16)
+            .background(
+                NavigationLink(destination: PayView(), isActive: $navigateToPayView) {
+                    EmptyView()
+                }
+                .hidden()
+            )
 
             if vm.isLoading {
                 VStack {
@@ -293,3 +312,15 @@ struct AnswerChevronRow: View {
 
 }
 
+#Preview {
+    let client = SupabaseClient(
+        supabaseURL: URL(string: "https://placeholder.supabase.co")!,
+        supabaseKey: "placeholder-key"
+    )
+    
+    CompleteAnswerContentView(
+        familyId: UUID(),
+        client: client
+    )
+    .environmentObject(SessionManager(client: client))
+}
