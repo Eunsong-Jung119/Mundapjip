@@ -160,7 +160,13 @@ final class SessionManager: ObservableObject {
         
         // ✅ 이미 홈 화면이면 재계산 스킵
         if route == .home {
-            print("[auth] already home — skip checkAuthState")
+            print("[auth] already home — skip routing, run warmUp only")
+            if let uid = currentUserId {
+                Task { [weak self] in
+                    guard let self else { return }
+                    await self.postLoginWarmUp(userId: uid)
+                }
+            }
             return
         }
 
