@@ -13,7 +13,7 @@ final class StoreManager: ObservableObject {
     static let productID = "com.eunsong.mundapjip.permanentOwnership"
 
     // MARK: - State
-    enum PurchaseState {
+    enum PurchaseState: Equatable {
         case idle, purchasing, purchased, failed(String)
     }
 
@@ -97,10 +97,16 @@ final class StoreManager: ObservableObject {
     }
 
     // MARK: - Restore
+    var onRestoreSuccess: (() async -> Void)?
+
     func restore() async {
         do {
             try await AppStore.sync()
             await checkPurchaseStatus()
+            if isPurchased {
+                purchaseState = .purchased
+                await onRestoreSuccess?()
+            }
         } catch {
             purchaseState = .failed("복원에 실패했습니다: \(error.localizedDescription)")
         }

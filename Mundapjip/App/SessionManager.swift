@@ -87,6 +87,17 @@ final class SessionManager: ObservableObject {
 
     // MARK: - Purchase State
     @Published var isPurchased: Bool = UserDefaults.standard.bool(forKey: "store.isPurchased")
+    @Published var familyIsPurchased: Bool = false
+    @Published var lastSubmittedAt: Date? = nil
+
+    var isAccessLocked: Bool {
+        !familyIsPurchased && isTrialExpired
+    }
+
+    private var isTrialExpired: Bool {
+        guard let last = lastSubmittedAt else { return false }
+        return Date().timeIntervalSince(last) > 7 * 24 * 60 * 60
+    }
 
     // MARK: - Family State
     @Published var currentFamilyId: UUID?
@@ -308,7 +319,7 @@ final class SessionManager: ObservableObject {
         isWarmingUp = true
         defer { isWarmingUp = false }
 
-        // ✅ 모든 warmup 작업을 병렬로 실행
+        // ✅ 병렬 warmup (familyId 불필요한 작업들)
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.ensureFamilyForUserIfNeeded() }
             group.addTask { await self.initialLoadFamilyId(userId: userId) }
@@ -322,6 +333,9 @@ final class SessionManager: ObservableObject {
                 }
             }
         }
+
+        // ✅ familyId 확보 후 순차 실행
+        await refreshFamilyPurchaseStatus()
 
         // ⏱️ 푸시 권한 요청은 5초 후에 (사용자가 앱에 익숙해진 후)
         Task { [weak self] in
@@ -506,9 +520,12 @@ final class SessionManager: ObservableObject {
         hasAnswered = false
         otherHasAnswered = false
 
+        familyIsPurchased = false
+        lastSubmittedAt = nil
+
         currentTab = .home
         accountDeletedError = false
-        
+
         //5) 캐시 초기화
         cachedAnswers = [:]
 
@@ -770,6 +787,30 @@ final class SessionManager: ObservableObject {
                 }
             }
 
+        // ✅ families 테이블 변경 감지 (is_purchased 실시간 반영)
+        familyChannel?
+            .on(
+                "postgres_changes",
+                filter: .init(
+                    event: "UPDATE",
+                    schema: "public",
+                    table: "families"
+                )
+            ) { [weak self] msg in
+                guard let self else { return }
+
+                print("📡 families Realtime 이벤트:", msg)
+
+                if let newData = msg.payload["new"] as? [String: Any],
+                   let purchased = newData["is_purchased"] as? Bool,
+                   purchased {
+                    Task { @MainActor in
+                        self.familyIsPurchased = true
+                        print("📡 families.is_purchased → true (Realtime)")
+                    }
+                }
+            }
+
         familyChannel?.subscribe()
     }
 
@@ -917,6 +958,101 @@ final class SessionManager: ObservableObject {
         }
     }
     
+    // MARK: - Family Purchase Status (RPC)
+
+    @MainActor
+    func refreshFamilyPurchaseStatus() async {
+        guard let familyId = currentFamilyId else {
+            print("[purchase] no familyId — skip refresh")
+            return
+        }
+
+        do {
+            struct PurchaseStatusRow: Decodable {
+                let is_purchased: Bool
+                let last_submitted_at: String?
+            }
+
+            let row: PurchaseStatusRow = try await client
+                .rpc("get_family_purchase_status", params: ["p_family_id": familyId.uuidString])
+                .single()
+                .execute()
+                .value
+
+            familyIsPurchased = row.is_purchased
+
+            print("[purchase] raw last_submitted_at:", row.last_submitted_at ?? "nil")
+
+            if let dateStr = row.last_submitted_at {
+                let df = DateFormatter()
+                df.locale = Locale(identifier: "en_US_POSIX")
+                df.timeZone = TimeZone(identifier: "UTC")
+
+                // Supabase timestamptz: "2026-01-01 00:00:00+00"
+                let formats = [
+                    "yyyy-MM-dd HH:mm:ssxx",
+                    "yyyy-MM-dd HH:mm:ss.SSSSSxx",
+                    "yyyy-MM-dd'T'HH:mm:ssxx",
+                    "yyyy-MM-dd'T'HH:mm:ss.SSSSSxx"
+                ]
+
+                var parsed: Date? = nil
+                for fmt in formats {
+                    df.dateFormat = fmt
+                    if let d = df.date(from: dateStr) {
+                        parsed = d
+                        break
+                    }
+                }
+                lastSubmittedAt = parsed
+
+                if parsed == nil {
+                    print("⚠️ [purchase] failed to parse date:", dateStr)
+                }
+            } else {
+                lastSubmittedAt = nil
+            }
+
+            print("[purchase] familyIsPurchased:", familyIsPurchased,
+                  "lastSubmittedAt:", lastSubmittedAt?.description ?? "nil",
+                  "isAccessLocked:", isAccessLocked)
+        } catch {
+            print("❌ refreshFamilyPurchaseStatus failed:", error)
+        }
+    }
+
+    @MainActor
+    func updateFamilyPurchaseStatus() async {
+        print("[purchase] updateFamilyPurchaseStatus called, familyId: \(currentFamilyId?.uuidString ?? "nil")")
+        guard let familyId = currentFamilyId else {
+            print("[purchase] no familyId — skip update")
+            return
+        }
+
+        do {
+            let userId = try await client.auth.session.user.id
+
+            print("[purchase] RPC update_family_purchase_status — familyId:", familyId, "userId:", userId)
+
+            let success: Bool = try await client
+                .rpc("update_family_purchase_status", params: [
+                    "p_family_id": familyId.uuidString,
+                    "p_user_id": userId.uuidString
+                ])
+                .execute()
+                .value
+
+            if success {
+                familyIsPurchased = true
+                print("✅ families.is_purchased = true 업데이트 완료 (RPC)")
+            } else {
+                print("⚠️ update_family_purchase_status returned false")
+            }
+        } catch {
+            print("❌ updateFamilyPurchaseStatus failed:", error)
+        }
+    }
+
     // MARK: - Ask for Push Permission if needed
     
     func requestPushPermissionIfNeeded() {

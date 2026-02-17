@@ -7,7 +7,7 @@
 import SwiftUI
 import Supabase
 
-enum QuizState {
+enum QuizState: Equatable {
     case notAnsweredYet
     case waitingForOther
     case bothAnswered
@@ -42,7 +42,14 @@ struct QuizContentView: View {
             Task {
                 await session.refreshFamilyPairingState()
                 await session.refreshAnswerState()
-                isFamilyStateReady = true    
+                isFamilyStateReady = true
+            }
+        }
+        .onChange(of: currentQuizState) { _, newState in
+            if newState == .bothAnswered {
+                Task {
+                    await session.refreshFamilyPurchaseStatus()
+                }
             }
         }
     }
@@ -181,6 +188,14 @@ struct CompleteAnswerContentView: View {
     private let captionColor = Color("#7B6A5C")
 
     var body: some View {
+        if session.isAccessLocked {
+            LockedAnswerView()
+        } else {
+            answerListContent
+        }
+    }
+
+    private var answerListContent: some View {
         VStack(spacing: 0) {
 
             // ✅ TitleSubtitle 재사용
@@ -193,7 +208,7 @@ struct CompleteAnswerContentView: View {
             .padding(.top, 16)
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
-            
+
 
             if vm.isLoading {
                 VStack {
@@ -224,8 +239,8 @@ struct CompleteAnswerContentView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 16) {
-                        // 결제 유도 배너 (구매 완료 시 숨김)
-                        if !session.isPurchased {
+                        // 결제 유도 배너 (구매 완료 시 숨김, 잠금 상태에서도 숨김)
+                        if !session.familyIsPurchased && !session.isAccessLocked {
                             Button {
                                 navigateToPayView = true
                             } label: {
@@ -239,7 +254,7 @@ struct CompleteAnswerContentView: View {
                                 .hidden()
                             )
                         }
-                        
+
                         ForEach(Array(vm.items.enumerated()), id: \.offset) { index, item in
                             NavigationLink(value: item) {
                                 AnswerChevronRow(

@@ -59,7 +59,6 @@ struct PayView: View {
                 PrimaryCTAButton(title: purchaseButtonTitle) {
                     Task {
                         await storeManager.purchase()
-                        handlePurchaseResult()
                     }
                 }
                 .disabled(!isSelected || isPurchasing)
@@ -69,7 +68,6 @@ struct PayView: View {
                 Button {
                     Task {
                         await storeManager.restore()
-                        handlePurchaseResult()
                     }
                 } label: {
                     Text("이전 구매 복원하기")
@@ -100,6 +98,23 @@ struct PayView: View {
         .toolbar(.hidden, for: .tabBar)
         .task {
             await storeManager.loadProduct()
+            storeManager.onRestoreSuccess = { [weak session] in
+                await session?.updateFamilyPurchaseStatus()
+            }
+        }
+        .onChange(of: storeManager.purchaseState) { _, newState in
+            print("[purchase] purchaseState changed to: \(newState)")
+            switch newState {
+            case .purchased:
+                session.isPurchased = true
+                Task { await session.updateFamilyPurchaseStatus() }
+                dismiss()
+            case .failed(let message):
+                errorMessage = message
+                showErrorAlert = true
+            default:
+                break
+            }
         }
         .alert("알림", isPresented: $showErrorAlert) {
             Button("확인", role: .cancel) {}
@@ -121,19 +136,4 @@ struct PayView: View {
         }
         return "문답집 구매하기"
     }
-
-    private func handlePurchaseResult() {
-        switch storeManager.purchaseState {
-        case .purchased:
-            session.isPurchased = true
-            dismiss()
-        case .failed(let message):
-            errorMessage = message
-            showErrorAlert = true
-        default:
-            break
-        }
-    }
 }
-
-
