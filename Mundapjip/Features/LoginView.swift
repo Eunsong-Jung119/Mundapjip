@@ -43,14 +43,16 @@ struct LoginView: View {
 
                 // 버튼 영역
                 VStack(spacing: 12) {
-                    // ✅ 2) 심사위원을 위한 이메일 로그인 버튼 배치
+                    /* 이메일 로그인 숨김
                     emailLoginButton
+                    */
                     
                     appleButton
                         .disabled(isLoading)
-
+                    /* 카카오도 숨김
                     kakaoButton
                         .disabled(isLoading)
+                     */
                 }
                 .frame(maxWidth: buttonMaxWidth)
                 .frame(maxWidth: .infinity)
@@ -114,7 +116,7 @@ struct LoginView: View {
         } catch {
             print("[Login] Apple Sign In error:", error)
             alertMessage = "애플 로그인에 실패했어요."
-            showAlert = true
+            showAlert = false
         }
     }
 

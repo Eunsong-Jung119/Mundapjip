@@ -2,6 +2,7 @@
 import SwiftUI
 import Supabase
 import UIKit
+import FirebaseCore
 
 @main
 struct MundapjipApp: App {
@@ -42,7 +43,8 @@ struct MundapjipApp: App {
         let initDuration = Date().timeIntervalSince(initStartTime) * 1000
         print("⏱️ [Launch] App init completed in \(String(format: "%.0f", initDuration))ms")
     }
-
+    
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     var body: some Scene {
         WindowGroup {
             RootView()

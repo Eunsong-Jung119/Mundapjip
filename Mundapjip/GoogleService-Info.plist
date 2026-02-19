@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCB0boOl4K0ztDBKimPjkFT9Bg6ApPH-GE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>183176311430</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.eunsong.mundapjip</string>
+	<key>PROJECT_ID</key>
+	<string>mundapjip-df262</string>
+	<key>STORAGE_BUCKET</key>
+	<string>mundapjip-df262.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:183176311430:ios:2ae7b42929d3a9288b9707</string>
+</dict>
+</plist>

@@ -1,3 +1,4 @@
+
 //
 //  ProfileView.swift
 //  Mundapjip
@@ -14,6 +15,7 @@ struct ProfileView: View {
     @State private var showDeleteAccountAlert = false
     @State private var isDeletingAccount = false
     @State private var deleteError: String?
+    @State private var showUserIdCopiedToast = false
 
     // MARK: - App Version
     private var appVersion: String {
@@ -31,13 +33,21 @@ struct ProfileView: View {
             return "역할을 선택해주세요"
         }
 
-        // ⚠️ 네 프로젝트 enum 케이스명에 맞게만 조정!
         switch role {
         case .parent:
             return "부모님으로 참여중"
         case .child:
             return "자녀로 참여중"
         }
+    }
+    
+    // MARK: - User ID (고객 고유번호)
+    private var userIdText: String {
+        guard let userId = session.currentUserId?.uuidString else {
+            return "알 수 없음"
+        }
+        let prefix = userId.prefix(6).uppercased()
+        return "\(prefix)..."
     }
 
     // MARK: - Actions
@@ -57,11 +67,23 @@ struct ProfileView: View {
 
             do {
                 try await session.deleteAccount()
-                // 성공 시 자동으로 로그인 화면으로 이동 (SessionManager에서 처리)
             } catch {
-                // 에러 발생 시 알럿 표시
                 deleteError = "탈퇴 처리 중 오류가 발생했습니다.\n네트워크 연결을 확인하고 다시 시도해주세요."
                 print("❌ Delete account error: \(error)")
+            }
+        }
+    }
+    
+    private func copyUserIdToClipboard() {
+        if let userId = session.currentUserId?.uuidString {
+            UIPasteboard.general.string = userId
+            withAnimation {
+                showUserIdCopiedToast = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                withAnimation {
+                    showUserIdCopiedToast = false
+                }
             }
         }
     }
@@ -74,7 +96,6 @@ struct ProfileView: View {
 
                         headerView
 
-                        // ✅ 역할 카드: 카드 전체(변경 포함) 탭하면 ChangeRoleView로 이동
                         NavigationLink {
                             ChangeRoleView { _ in
                                 withAnimation {
@@ -90,12 +111,17 @@ struct ProfileView: View {
                         } label: {
                             RoleCard(roleText: roleDisplayText)
                         }
-                        .buttonStyle(.plain)   // ✅ NavigationLink 기본 파란색/하이라이트 제거
+                        .buttonStyle(.plain)
 
                         // MARK: - 정보
                         ProfileSection {
                             ProfileVersionRow(version: appVersion)
+                            
+                            CustomerIDRow(userId: userIdText) {
+                                copyUserIdToClipboard()
+                            }
 
+                            
                             ProfileRow(title: "이용 약관") {
                                 openURL(termsURL)
                             }
@@ -154,24 +180,20 @@ struct ProfileView: View {
                     }
                 }
 
-                // MARK: - Toast
-                if showRoleChangedToast {
-                    VStack {
-                        Spacer()
+                // MARK: - Toasts
+                VStack {
+                    Spacer()
 
-                        Text("역할이 변경되었습니다 🎉")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(
-                                Capsule()
-                                    .fill(Color.black.opacity(0.85))
-                            )
-                            .padding(.bottom, 24)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    if showRoleChangedToast {
+                        ToastView(message: "역할이 변경되었습니다 🎉")
+                    }
+
+                    if showUserIdCopiedToast {
+                        ToastView(message: "고객 고유번호가 복사되었습니다")
                     }
                 }
+                .padding(.bottom, 24)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             .alert("로그아웃 하시겠어요?", isPresented: $showLogoutAlert) {
                 Button("취소", role: .cancel) {}
@@ -210,7 +232,6 @@ struct ProfileView: View {
 
 // MARK: - Subviews
 
-/// ✅ 버튼 제거: "변경"은 Text로만 표시 (탭 이벤트를 가로채지 않음)
 struct RoleCard: View {
     let roleText: String
 
@@ -230,7 +251,7 @@ struct RoleCard: View {
 
             Text("변경")
                 .font(.subheadline)
-                .foregroundStyle(.blue) 
+                .foregroundStyle(.blue)
         }
         .padding()
         .background(Color.white)
@@ -252,6 +273,7 @@ struct ProfileSection<Content: View>: View {
 
 struct ProfileRow: View {
     let title: String
+    var subtitle: String? = nil
     var isDestructive: Bool = false
     var action: (() -> Void)? = nil
 
@@ -265,6 +287,12 @@ struct ProfileRow: View {
                     .foregroundStyle(isDestructive ? .red : .primary)
 
                 Spacer()
+
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                }
 
                 Image(systemName: "chevron.right")
                     .font(.footnote)
@@ -291,6 +319,48 @@ struct ProfileVersionRow: View {
     }
 }
 
+
+struct CustomerIDRow: View {
+    let userId: String
+    var action: (() -> Void)? = nil
+
+    var body: some View {
+        Button {
+            action?()
+        } label: {
+            HStack {
+                Text("고객 고유번호")
+                    .font(.body)
+                    .foregroundStyle(.primary)
+
+                Spacer()
+
+                Text(userId)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+            }
+            .padding()
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct ToastView: View {
+    let message: String
+
+    var body: some View {
+        Text(message)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                Capsule()
+                    .fill(Color.black.opacity(0.85))
+            )
+    }
+}
+
 private var headerView: some View {
     Text("설정")
         .font(.system(size: 24, weight: .bold))
@@ -310,4 +380,3 @@ private func openAppNotificationSettings() {
 #Preview {
     ProfileView()
 }
-

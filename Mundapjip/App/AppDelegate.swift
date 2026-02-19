@@ -7,6 +7,7 @@
 
 import UIKit
 import UserNotifications
+import FirebaseCore
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 
@@ -14,7 +15,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
-
+        
+        FirebaseApp.configure()
         // ⏱️ 백그라운드에서 실행하여 메인 스레드 블로킹 방지
         DispatchQueue.global(qos: .utility).async {
             DispatchQueue.main.async {
